@@ -9,9 +9,12 @@ FROM ubuntu:16.04
 #MAINTAINER My Name <my@email.net>
 
 # ------------------------
-# Build requirements
+# Build variables: use
+#    docker build --build-arg sbin=$URL
+# to override the below defaults.
+ARG sbin=http://localhost/minetestsevrer
 
-RUN apt-get update && apt-get install -y ca-certificates git make gcc g++ libirrlicht-dev cmake libbz2-dev libpng-dev libjpeg-dev libxxf86vm-dev libgl1-mesa-dev libsqlite3-dev libogg-dev libvorbis-dev libopenal-dev libcurl4-gnutls-dev libfreetype6-dev zlib1g-dev libgmp-dev libjsoncpp-dev
+RUN apt-get update && apt-get install -y ca-certificates git wget
 
 # Ensure a predictable location for the volume mount
 WORKDIR /root
@@ -19,13 +22,9 @@ WORKDIR /root
 RUN git clone https://github.com/minetest/minetest
 
 WORKDIR /root/minetest
+RUN mkdir bin
 
-RUN cmake . -DBUILD_CLIENT=false -DBUILD_SERVER=true
-RUN make -j1
-
-# Cleanup - de-bloat :-)
-RUN apt-get remove -y make gcc g++ libirrlicht-dev cmake libbz2-dev libpng-dev libjpeg-dev libxxf86vm-dev libgl1-mesa-dev libsqlite3-dev libogg-dev libvorbis-dev libopenal-dev libcurl4-gnutls-dev libfreetype6-dev zlib1g-dev libgmp-dev libjsoncpp-dev
-RUN apt-get clean -y && apt-get autoremove -y
+RUN wget "$sbin" -O bin/minetestserver
 
 # Make the exportable (importable?) environment
 # The main user data folders are all shipped out to a
