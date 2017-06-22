@@ -4,11 +4,13 @@
 # 
 # Usage:
 # 
-# 	run-dmine.sh IMAGE [ -d MINETESTDATA ] [ -p PORT ]
+# 	run-dmine.sh IMAGE [ -d MINETESTDATA ] [ -p PORT ] [-t CONTAINERNAME]
 # 
 # MINETESTDATA - a directory or Docker volume containing the minetest user data
 #
 # PORT - the port Minetest will listen on
+#
+# CONTAINERNAME - a name for the container
 # 
 # See https://github.com/taikedz/minetest-docker
 #
@@ -261,6 +263,12 @@ get_port_arg() {
 	[[ "$port" =~ ^[0-9]+$ ]] && mtport="$port"
 }
 
+get_title_arg() {
+	local title="$(get_arg_for -t "$@")"
+
+	[[ -n "$title" ]] && mttitle=(-t "$title")
+}
+
 get_dir_arg() {
 	local direc="$(get_arg_for -d "$@")"
 	[[ -n "$direc" ]] && {
@@ -283,7 +291,9 @@ main() {
 
 	get_dir_arg || dirsetup # Only if we do not receive an override
 
-	docker run -d "$imagename" -v "$mtdatadir:/root/minetest/userdata:rw" -p "$mtport:$mtport/udp"
+	get_title_arg
+
+	docker run "${mttitle[@]}" -d "$imagename" -v "$mtdatadir:/root/minetest/userdata:rw" -p "$mtport:$mtport/udp"
 
 }
 
