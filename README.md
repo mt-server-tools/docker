@@ -7,3 +7,9 @@ These are Dockerfile profiles for building Minetest docker images, and maintaini
 ## Usage
 
 In the `docks/` directory, you will find a number of folders, collating individual profiles for building images.
+
+`cd into one of the directories and run
+
+	docker build
+
+to build an image (you may need to configure the `Maintainer` first)
