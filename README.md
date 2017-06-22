@@ -57,17 +57,55 @@ Just a couple of profiels are available at the moment. Stay tuned for more, incl
 
 (to be completed)
 
-Here is a sequence of example commands to demonstrate how you could use an image:
+## Build-and-run
 
 	git clone https://github.com/taikedz/minetest-docker
 	cp minetest-docker/bin/run-dmine.sh /usr/local/bin/
+	cd minetest-docker/docks/basic
+	docker build -t mtserver .
+	run-dmine.sh mtserver
 
+## Build-and-publish
+
+--
+
+## Download image, configure data, and run
+
+Here is a sequence of example commands to demonstrate how you could use an image:
+
+	# ---
+	# Get this tool !
+	
+	git clone https://github.com/taikedz/minetest-docker
+	cp minetest-docker/bin/run-dmine.sh /usr/local/bin/
+
+
+	# ---
+	# Setup a data dir and add some mods
+	
+	mkdir -p minetest-data/{mods,games,worlds}
+	
+	( cd minetest-data/mods
+		git clone https://github.com/tenplus1/protector
+		git clone https://github.com/tenplus1/mobs_redo
+		git clone https://github.com/tenplus1/mobs_animal
+		git clone https://github.com/tenplus1/mobs_monster
+		git clone https://github.com/tenplus1/farming_plus
+	)
+
+	# Configure some basics
+	
+	( cd minetest-data
+		echo "name = Admin" >> minetest.conf
+		echo "port = 31000" >> minetest.conf
+		echo "motd = Dockerized !" >> minetest.conf
+	)
+
+
+	# ---
+	# Pull the image and use it !
+	
 	docker pull someuser/minetest-docker
-	run-dmine.sh someuser/minetest-docker -t mtd-init
-
-	docker rm mtd-init
-
-	# -- at this point, install mods etc in 
-
+	run-dmine.sh someuser/minetest-docker -d minetest-data -t mtd-init -p 31000
 
 
