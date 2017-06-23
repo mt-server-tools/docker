@@ -266,7 +266,7 @@ get_port_arg() {
 get_title_arg() {
 	local title="$(get_arg_for -t "$@")"
 
-	[[ -n "$title" ]] && mttitle=(-t "$title")
+	[[ -n "$title" ]] && mttitle=(--name "$title")
 }
 
 get_dir_arg() {
@@ -293,7 +293,7 @@ main() {
 
 	get_title_arg
 
-	docker run "${mttitle[@]}" -d "$imagename" -v "$mtdatadir:/root/minetest/userdata:rw" -p "$mtport:$mtport/udp"
+	docker run "${mttitle[@]}" -d -v "$mtdatadir:/root/minetest/userdata" -p "$mtport:$mtport/udp" "$imagename"
 
 }
 
