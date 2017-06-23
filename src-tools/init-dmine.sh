@@ -75,7 +75,7 @@ main() {
 
 	get_title_arg
 
-	docker run "${mttitle[@]}" -d "$imagename" -v "$mtdatadir:/root/minetest/userdata:rw" -p "$mtport:$mtport/udp"
+	docker run "${mttitle[@]}" -d "$imagename" -v "$mtdatadir:/root/minetest/userdata" -p "$mtport:$mtport/udp"
 
 }
 

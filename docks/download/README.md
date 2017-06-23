@@ -13,7 +13,7 @@ This is is useful for producing an image faster if you already have a regular bu
 
 ## Usage
 
-Use the `run-dmine.sh` script to properly mount user data.
+Use the `init-dmine.sh` script to properly mount user data.
 
 See the main README for Minetest-Docker for more info.
 

@@ -1,2 +1,2 @@
 BUILDOUTD=bin
-BBFILES=src-tools/run-dmine.sh
+BBFILES=src-tools/init-dmine.sh

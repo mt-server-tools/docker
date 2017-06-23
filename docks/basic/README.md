@@ -16,6 +16,6 @@ Build is fairly simple
 
 ## Usage
 
-Use the `run-dmine.sh` script to easily prepare user data.
+Use the `init-dmine.sh` script to easily prepare user data.
 
 See the main README for Minetest-Docker for more info.
