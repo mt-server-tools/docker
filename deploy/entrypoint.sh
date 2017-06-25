@@ -8,4 +8,5 @@ cd "$MTHOME"
 
 while true; do
 	bin/minetestserver --config 'userdata/minetest.conf' --logfile 'userdata/debug.txt' --world 'userdata/worlds/world' "$@"
+	sleep 1
 done
