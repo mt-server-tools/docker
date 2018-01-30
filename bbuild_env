@@ -1,2 +1,0 @@
-BUILDOUTD=bin
-BBFILES=src-tools/init-dmine.sh
