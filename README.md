@@ -4,9 +4,31 @@ Copyright: (C) 2017 Tai "DuCake" Kedzierski. This software is Free Software unde
 
 ***Dockerization for Minetest !***
 
+## Install
+
+### Install the management tool
+
+The management tool `mt-run` is not mandatory, but aims to simplify minetest server management for beginners.
+
+	bash bin/install-mt-run.sh
+
+Run as regular user to install just for that user.
+
+Run as root to install for all users.
+
+### Install docker
+
+If you don't have docker on your server, run
+
+	sudo bash bin/install-docker.sh
+
+This installs the latest `docker-ce` from Docker.com, replacing any `docker.io` you may already have -- you may want to not run it if you already have `docker`.
+
+This script should work for Debian, Ubuntu and CentOS.
+
 ## Usage
 
-This project builds two images: one from the stable ppa, one fro mthe daily ppa.
+This project builds two images: one from the stable ppa, one from the daily ppa.
 
 You need to supply a maintainer email and a Docker Hub username to use the build script:
 
