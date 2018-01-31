@@ -4,136 +4,59 @@ Copyright: (C) 2017 Tai "DuCake" Kedzierski. This software is Free Software unde
 
 ***Dockerization for Minetest !***
 
-These are Dockerfile profiles for building Minetest docker images.
-
 ## Usage
 
-In the `docks/` directory, you will find a number of folders, collating individual profiles for building images.
+This project builds two images: one from the stable ppa, one fro mthe daily ppa.
 
-`cd` into one of the directories and run
+You need to supply a maintainer email and a Docker Hub username to use the build script:
 
-	docker build -t IMAGENAME .
+	MAINTAINER=me@domain.net HUBNAME=myname bash bin/build-all.sh
 
-See the individual README files for specific info on each build.
+Once completed, you will have two local images to launch Minetest server containers from.
 
-### Run the image
+### Run a server
 
-The image is configured so that user data can be mounted as a docker volume.
+Use the `bin/mt-run` script to manage Minetest servers.
+ 
+	mt-run run CONTAINER {stable | daily} PORT [-d MINETESTDIR|-v VOLUMENAME]
 
-A typical command to initialize a new container from an image would be:
+If you specify a volume, a Docker volume is used.
 
-	docker run -d -v MINETESTDIR:/root/minetest/userdata [ -p PORT:PORT/udp ] [ --name CONTAINERNAME ] IMAGENAME
+If you specify a directory, you can either use
 
-`IMAGENAME` is the name of the built minetest image.
+* an existing `$HOME/.minetest` folder
+* a freshly cloned folder form `http://github.com/minetest/minetest`
+* or create one from scratch.
 
-`PORT` is the port to expose on the host. The host port must match the container's port. The port in question must match the port configured in `minetest.conf`
+If you do not specify either, the `~/.minetest` folder in the host environment is used.
 
-`CONTAINERNAME` is the name of the container to create.
+## Manage containers
 
-`MINETESTDIR` is a Minetest directory structured like so:
+To start any container, run
 
-	minetest-data
-	  |
-	  +-- games/
-	  |
-	  +-- minetest.conf
-	  |
-	  +-- mods/
-	  |
-	  +-- worlds/
-	        |
-		+-- ... world dirs ..
+	mt-run start CONTAINER
 
-In essence, you can either use an existing `$HOME/.minetest` folder, a freshly cloned folder form `http://github.com/minetest/minetest`, or create one from scratch. Note that if you supply a custom folder, you will also need to ensure that a subgame is configured in `games/`
+You can refresh your container from image by running
 
-If you do not specify a minetest directory to run from, a directory is created for you in the current working directory, and the default `minetest_game` is automatically downloaded.
+	mt-run refresh CONTAINER
 
-### Configuring a folder
+You will be able to convert the database type of the world configured in the `minetest.conf` with
 
-TODO
+	mt-run convert CONTAINER DBTYPE
 
-### Running containers
+(db conversion not yet implemented...)
 
-Once you have initialized a container, you can run it again by name or by ID.
+## Refresh containers
 
-To see the container IDs and names:
+If you are runnnig containers off of `stable`, you will only need to refresh when a new major version comes out.
 
-	docker ps -a 
+If you are running containers off of `daily-builds` you can refresh up to once a day!
 
-To run a container instance:
+Do the following:
 
-	docker start CONTAINERNAME
+	# Rebuild images
+	bash bin/build-all.sh daily
 
-## Available build profiles
-
-Just a couple of profiles are available at the moment. Stay tuned for more, including LevelDB and Redis support.
-
-* `basic` - a standard run-in-place `minetestserver` binary that uses SQLite as its back-end. No curses support, redis, or such.
-* `download` - similar to basic, but instead of performing the software build during the image creation, it downloads the binary from an external build URL
-
-## Examples
-
-(to be completed)
-
-## Build-and-run
-
-	git clone https://github.com/taikedz/minetest-docker
-	cd minetest-docker/docks/basic
-	docker build -t image_name .
-
-	# Create data dirs
-	#   and install mods and games to the appropriate folders
-	mkdir -p minetest_data/{mods,games,worlds,textures}
-
-	docker run -d -p 30000:30000/udp -v minetest_data:/root/minetest/userdata --name first_world
-
-	docker stop first_world
-
-	# Look in the worlds dir and activate the mods
-
-	docker start first_world
-
-## Build-and-publish
-
---
-
-## Download image, configure data, and run
-
-Here is a sequence of example commands to demonstrate how you could use an image:
-
-	# ---
-	# Get this tool !
-	
-	git clone https://github.com/taikedz/minetest-docker
-	cp minetest-docker/bin/run-dmine.sh /usr/local/bin/
-
-
-	# ---
-	# Setup a data dir and add some mods
-	
-	mkdir -p minetest-data/{mods,games,worlds}
-	
-	( cd minetest-data/mods
-		git clone https://github.com/tenplus1/protector
-		git clone https://github.com/tenplus1/mobs_redo
-		git clone https://github.com/tenplus1/mobs_animal
-		git clone https://github.com/tenplus1/mobs_monster
-		git clone https://github.com/tenplus1/farming_plus
-	)
-
-	# Configure some basics
-	
-	( cd minetest-data
-		echo "name = Admin" >> minetest.conf
-		echo "port = 31000" >> minetest.conf
-		echo "motd = Dockerized !" >> minetest.conf
-	)
-
-
-	# ---
-	# Pull the image and use it !
-	
-	docker pull someuser/minetest-docker
-	run-dmine.sh someuser/minetest-docker -d minetest-data -t mtd-init -p 31000
-
+	# Refresh a container
+	bash bin/mt-run refresh $CONTAINERNAME
 

@@ -1,0 +1,141 @@
+#!/bin/bash
+
+printhelp() {
+cat <<'EOHELP'
+
+Run a dockerized minetest !
+ 
+	mt-run run CONTAINER {stable | daily} PORT [-d MINETESTDIR|-v VOLUMENAME]
+	mt-run start CONTAINER
+	mt-run refresh CONTAINER
+	mt-run convert CONTAINER DBTYPE
+
+The run option creates and starts a new container.
+If neither a minetest data directory is specified with -d
+ nor a volume is specified with -v, then the ~/.minetest folder is used
+
+The start option starts the named container.
+
+The refresh option loads the existing config from ~/.config/minetest-docker
+ removes the existing container, and creates a new one, with the existing configuration
+
+The convert option converts the minetest world to the specified database type [sqlite,leveldb].
+
+EOHELP
+}
+
+set -euo pipefail
+
+container_infod="$HOME/.config/mintest-docker"
+
+container_exists() {
+	docker ps -a --format '{{.Names}}'|grep -Pq "^$container$"
+}
+
+register_container() {
+	mkdir -p "$container_infod"
+	echo -e "container=$container\ntype=$type\ntarget=$target\nport=$port\nbuild=$build" > "$container_file"
+}
+
+convert_minetest() {
+	out:fail "Not yet implemented !"
+}
+
+refresh_minetest() {
+	[[ -f "$container_file" ]] || out:fail "No file [$container_file]"
+	. "$container_file"
+
+	docker rm "$container"
+	launch_minetest
+}
+
+launch_minetest() {
+	if container_exists ; then
+		out:fail "Container [$container] already exists !"
+	fi
+
+	port_is_free "$port"
+
+	docker run -d --mount="type=$type,source=$target,destination=/home/minetest/.minetest" -p "$port:$port/udp" --name="$container" minetest-"$build"
+}
+
+port_is_free() {
+	local tport="$1"; shift
+	local containers=($(docker ps -a --format '{{.Names}}'))
+
+	for mycontainer in "${containers[@]}"; do
+		docker inspect --format '{{range $p, $conf := .NetworkSettings.Ports}} {{(index $conf 0).HostPort}} {{end}}' "$mycontainer" | grep -P "^$tport$" && return 1 || :
+	done
+
+	return 0
+}
+
+do_start() {
+	container_exists || out:fail "No such container [$container]"
+
+	docker start "$container"
+}
+
+load_and_start() {
+	. "$container_file"
+	do_start
+}
+
+out:fail() {
+	echo "$*" >&2
+	exit 1
+}
+
+do_run() {
+	build="$1" && shift || out:fail "Specify a build 'stable' or 'daily' "
+	port="$1" && shift || out:fail "Specify a port "
+
+	option="${1:-}"
+	target="${2:-}"
+
+	if [[ -z "$option" ]]; then
+		target="$HOME/.minetest"
+	fi
+
+	case "$option" in
+	-d)
+		type=bind
+		launch_minetest
+		;;
+	-v)
+		type=volume
+		docker volume create "$target"
+		launch_minetest
+		;;
+	esac
+}
+
+main() {
+	if [[ "$*" =~ --help ]]; then
+		printhelp
+		exit 0
+	fi
+
+	mode="$1" && shift || out:fail "Specify a mode !"
+	
+	container="$1" && shift || out:fail "Specify a container name !"
+	container_file="$container_infod/$container.txt"
+
+	case "$mode" in
+	refresh)
+		refresh_minetest
+		;;
+	convert)
+		convert_minetest
+		;;
+	start)
+		do_start
+		;;
+	run)
+		do_run "$@"
+		;;
+	*)
+		out:fail "Invalid mode $mode"
+		;;
+	esac
+}
