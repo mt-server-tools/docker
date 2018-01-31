@@ -3,7 +3,7 @@
 # VERSION	0.1.0
 
 FROM ubuntu:latest
-MAINTAINER dch.tai@gmail.com
+MAINTAINER %MAINTAINER%
 
 RUN	apt-get update && apt-get install software-properties-common -y && \
 	echo|add-apt-repository ppa:minetestdevs/%%BUILDPROFILE%% && \
